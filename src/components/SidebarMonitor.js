@@ -162,6 +162,7 @@ function SidebarMonitor({
   selectedWarning,
   activeTab,
   titleOverride,
+  aiAnalysis, // Added prop from App.jsx
   emptyMessage = 'Select a warning on the timeline',
 }) {
   const counts = useMemo(() => {
@@ -219,7 +220,33 @@ function SidebarMonitor({
               <span className="warning-timestamp">{formatTimestamp(selectedWarning.timestamp)}</span>
               <span className="warning-person">{selectedWarning.person}</span>
             </div>
-            <p className="warning-text">{selectedWarning.text}</p>
+
+            {/* AI Result Box: Only shows if aiAnalysis has content */}
+            {aiAnalysis ? (
+              <div 
+                className="ai-analysis-container" 
+                style={{ 
+                  marginTop: '16px', 
+                  padding: '12px', 
+                  borderRadius: '8px', 
+                  border: '1px solid #4f46e5', 
+                  background: 'rgba(79, 70, 229, 0.1)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px' }}>✨</span>
+                  <strong style={{ fontSize: '11px', color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    AI Check Result
+                  </strong>
+                </div>
+                <p className="warning-text" style={{ fontStyle: 'italic', color: '#fff', fontSize: '13px', lineHeight: '1.5' }}>
+                  {aiAnalysis}
+                </p>
+              </div>
+            ) : (
+              <p className="warning-text">{selectedWarning.text}</p>
+            )}
           </>
         ) : (
           <p className="sidebar-empty">{emptyMessage}</p>
