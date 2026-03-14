@@ -139,7 +139,7 @@ body {
 
 .timeline-slider-container {
   position: relative;
-  padding: 20px 0 8px;
+  padding: 8px 0 8px;
 }
 
 .timeline-slider-container input[type="range"] {
@@ -164,7 +164,7 @@ body {
 
 .timeline-markers {
   position: absolute;
-  top: 8px;
+  top: 9px;
   left: 0;
   right: 0;
   height: 12px;

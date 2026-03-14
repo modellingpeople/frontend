@@ -31,7 +31,22 @@ function Timeline({ warnings, minTime, maxTime, currentTime, onTimeChange, onMar
           min={minTime}
           max={maxTime}
           value={currentTime}
-          onChange={e => onTimeChange(Number(e.target.value))}
+          onChange={e => {
+            const newTime = Number(e.target.value);
+            onTimeChange(newTime);
+            if (warnings.length > 0) {
+              let closest = warnings[0];
+              let closestDist = Math.abs(new Date(closest.timestamp).getTime() - newTime);
+              for (let i = 1; i < warnings.length; i++) {
+                const dist = Math.abs(new Date(warnings[i].timestamp).getTime() - newTime);
+                if (dist < closestDist) {
+                  closest = warnings[i];
+                  closestDist = dist;
+                }
+              }
+              onMarkerClick(closest);
+            }
+          }}
         />
       </div>
       <div className="timeline-times">
