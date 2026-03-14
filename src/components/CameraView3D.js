@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import BodyMesh from './BodyMesh';
 import PointCloudView from './PointCloudView';
@@ -18,6 +18,7 @@ function CameraView3D({
   meshData,
   pointCloud,
   cameraData,
+  overlayMessage,
 }) {
   const animRef = useRef(null);
 
@@ -42,25 +43,12 @@ function CameraView3D({
     return () => clearInterval(animRef.current);
   }, [warning, meshData, onFrameChange]);
 
-  // Pre-flatten all frame vertices into Float32Arrays once on data load
-  const flattenedFrames = useMemo(() => {
-    if (!meshData || !meshData.frames) return null;
-    return meshData.frames.map((frame) => {
-      const verts = frame.verts;
-      const arr = new Float32Array(verts.length * 3);
-      for (let i = 0; i < verts.length; i++) {
-        arr[i * 3] = verts[i][0];
-        arr[i * 3 + 1] = verts[i][1];
-        arr[i * 3 + 2] = verts[i][2];
-      }
-      return arr;
-    });
-  }, [meshData]);
-
   // Get current mesh frame index
   const currentMeshFrameIdx = useMemo(() => {
-    if (!meshData || !meshData.frames) return 0;
-    if (!warning) return 0;
+    if (!meshData || !meshData.frames || meshData.frames.length === 0) return 0;
+    if (!warning) {
+      return Math.min(frameIndex, meshData.frames.length - 1);
+    }
     const meshStart = warning.mesh_frame_start || 0;
     return Math.min(meshStart + frameIndex, meshData.frames.length - 1);
   }, [warning, frameIndex, meshData]);
@@ -97,14 +85,6 @@ function CameraView3D({
     }
     return [cx / count, cy / count, cz / count];
   }, [currentVerts, initialCentroid]);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('[3D] meshCentroid:', meshCentroid);
-    console.log('[3D] currentVerts count:', currentVerts ? currentVerts.length : 0);
-    console.log('[3D] faces count:', meshData ? meshData.faces.length : 0);
-    console.log('[3D] point cloud count:', pointCloud ? pointCloud.positions.length : 0);
-  }, [meshCentroid, currentVerts, meshData, pointCloud]);
 
   // Severity color
   const severityColor = warning
@@ -146,7 +126,7 @@ function CameraView3D({
       </Canvas>
 
       {/* Overlay: frame counter */}
-      {warning && meshData && meshData.frames && (
+      {meshData && meshData.frames && meshData.frames.length > 0 && (
         <div style={{
           position: 'absolute',
           bottom: 12,
@@ -156,11 +136,11 @@ function CameraView3D({
           fontSize: 11,
           pointerEvents: 'none',
         }}>
-          Frame {frameIndex + 1}/{meshData.frames.length}
+          Frame {currentMeshFrameIdx + 1}/{meshData.frames.length}
         </div>
       )}
 
-      {!warning && (
+      {!warning && overlayMessage && (
         <div style={{
           position: 'absolute',
           top: '50%',
@@ -172,7 +152,7 @@ function CameraView3D({
           pointerEvents: 'none',
           textAlign: 'center',
         }}>
-          Select a warning to view 3D pose
+          {overlayMessage}
         </div>
       )}
     </div>

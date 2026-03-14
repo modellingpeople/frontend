@@ -4,6 +4,7 @@ const TAB_LABELS = {
   safety: 'Safety Monitor',
   elder_care: 'Elder Care Monitor',
   rehab_fitness: 'Rehab Monitor',
+  inference: 'Inference Monitor',
 };
 
 const SEVERITY_COLORS = {
@@ -155,7 +156,14 @@ function DonutChart({ counts, total }) {
   );
 }
 
-function SidebarMonitor({ warnings, allWarnings, selectedWarning, activeTab }) {
+function SidebarMonitor({
+  warnings,
+  allWarnings,
+  selectedWarning,
+  activeTab,
+  titleOverride,
+  emptyMessage = 'Select a warning on the timeline',
+}) {
   const counts = useMemo(() => {
     const c = { critical: 0, high: 0, medium: 0, low: 0 };
     (warnings || []).forEach(w => { if (c[w.severity] !== undefined) c[w.severity]++; });
@@ -175,7 +183,7 @@ function SidebarMonitor({ warnings, allWarnings, selectedWarning, activeTab }) {
     <div className="sidebar-monitor">
       {/* Stats Panel */}
       <div className="sidebar-panel sidebar-stats">
-        <h2 className="sidebar-title">{TAB_LABELS[activeTab] || 'Monitor'}</h2>
+        <h2 className="sidebar-title">{titleOverride || TAB_LABELS[activeTab] || 'Monitor'}</h2>
 
         <DonutChart counts={counts} total={total} />
 
@@ -214,7 +222,7 @@ function SidebarMonitor({ warnings, allWarnings, selectedWarning, activeTab }) {
             <p className="warning-text">{selectedWarning.text}</p>
           </>
         ) : (
-          <p className="sidebar-empty">Select a warning on the timeline</p>
+          <p className="sidebar-empty">{emptyMessage}</p>
         )}
       </div>
     </div>
