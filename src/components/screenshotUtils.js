@@ -43,14 +43,14 @@ const payload = {
   contents: [{
     parts: [
       { inline_data: { mime_type: "image/png", data: base64Data } },
-      { text: `CRITICAL: Do not analyze the image. Reply with "Hi" and nothing else. Output strictly text.` }
+      { text: "Analyze this 3D pose and environment.  You must limit your answer to 40 words. Do not describe the point cloud environment. Follow these tasks: 1. Focus on the purple model of the person and classify their pose. Are they sat down, standing, off balance, straining their back? 2. Based on that identify any safety risks related to their pose and surroundings." }
     ]
   }],
 
-  generationConfig: {
-    maxOutputTokens: 5, // This physically prevents a long response
-    temperature: 0.1    // Low temperature makes it more likely to follow instructions
-  }
+  // generationConfig: {
+  //   maxOutputTokens: 5, // This physically prevents a long response
+  //   temperature: 0.1    // Low temperature makes it more likely to follow instructions
+  // }
 };
 
   try {
