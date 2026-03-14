@@ -18,13 +18,13 @@ try { TAB_DATA.elder_care = require('./data/elder_care.json'); } catch (e) {}
 try { TAB_DATA.rehab_fitness = require('./data/rehab_fitness.json'); } catch (e) {}
 
 function getTabDerived(data) {
-  if (!data) return { meta: { joint_names: [], bones: [] }, warnings: [], persons: [], minTime: 0, maxTime: 0 };
-  const { meta, warnings } = data;
+  if (!data) return { warnings: [], persons: [], minTime: 0, maxTime: 0 };
+  const { warnings } = data;
   const persons = [...new Set(warnings.map(w => w.person))].sort();
   const timestamps = warnings.map(w => new Date(w.timestamp).getTime());
   const minTime = Math.min(...timestamps);
   const maxTime = Math.max(...timestamps);
-  return { meta, warnings, persons, minTime, maxTime };
+  return { warnings, persons, minTime, maxTime };
 }
 
 function App() {
@@ -35,11 +35,11 @@ function App() {
   const [selectedWarning, setSelectedWarning] = useState(null);
   const [frameIndex, setFrameIndex] = useState(0);
 
-  // 3D scene data (only for safety tab)
+  // 3D scene data
   const [sceneData, setSceneData] = useState(null);
   const [sceneLoading, setSceneLoading] = useState(true);
 
-  const { meta, warnings, persons, minTime, maxTime } = useMemo(
+  const { warnings, persons, minTime, maxTime } = useMemo(
     () => getTabDerived(TAB_DATA[activeTab]),
     [activeTab]
   );
@@ -81,8 +81,6 @@ function App() {
     setFrameIndex(0);
   };
 
-  const has3D = activeTab === 'safety' && sceneData && sceneData.mesh && sceneData.mesh.frames.length > 0;
-
   return (
     <div className="app">
       <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -96,31 +94,22 @@ function App() {
         <ViewToggle mode={viewMode} onChange={setViewMode} />
       </header>
 
-      {activeTab === 'safety' && sceneLoading ? (
+      {sceneLoading ? (
         <div className="camera-view" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: '#555', fontStyle: 'italic',
         }}>
           Loading 3D scene...
         </div>
-      ) : has3D ? (
+      ) : (
         <CameraView3D
           viewMode={viewMode}
           warning={selectedWarning}
           frameIndex={frameIndex}
           onFrameChange={setFrameIndex}
-          meshData={sceneData.mesh}
-          pointCloud={sceneData.point_cloud}
-          cameraData={sceneData.camera}
-        />
-      ) : (
-        <CameraView
-          viewMode={viewMode}
-          currentTime={currentTime}
-          warning={selectedWarning}
-          frameIndex={frameIndex}
-          onFrameChange={setFrameIndex}
-          meta={meta}
+          meshData={sceneData ? sceneData.mesh : null}
+          pointCloud={sceneData ? sceneData.point_cloud : null}
+          cameraData={sceneData ? sceneData.camera : null}
         />
       )}
 

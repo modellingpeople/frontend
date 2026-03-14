@@ -24,16 +24,11 @@ function CameraView3D({
 
   // Auto-advance frames when a warning is selected
   useEffect(() => {
-    if (!warning || !meshData) return;
+    if (!warning || !meshData || !meshData.frames || meshData.frames.length === 0) return;
 
     const meshStart = warning.mesh_frame_start || 0;
-    const warningFrameCount = warning.frames ? warning.frames.length : 0;
     const totalMeshFrames = meshData.frames.length;
-
-    // Use warning frame count if available, else play all mesh frames from start
-    const numFrames = warningFrameCount > 0
-      ? Math.min(warningFrameCount, totalMeshFrames - meshStart)
-      : totalMeshFrames;
+    const numFrames = totalMeshFrames - meshStart;
 
     if (numFrames <= 0) return;
 
@@ -162,7 +157,7 @@ function CameraView3D({
       </Canvas>
 
       {/* Overlay: frame counter */}
-      {warning && meshData && (
+      {warning && meshData && meshData.frames && (
         <div style={{
           position: 'absolute',
           bottom: 12,
@@ -172,7 +167,7 @@ function CameraView3D({
           fontSize: 11,
           pointerEvents: 'none',
         }}>
-          Frame {frameIndex + 1}/{warning.frames ? warning.frames.length : meshData.frames.length}
+          Frame {frameIndex + 1}/{meshData.frames.length}
         </div>
       )}
 
