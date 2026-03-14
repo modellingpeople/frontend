@@ -14,6 +14,7 @@ import TabBar from './components/TabBar';
 import SidebarMonitor from './components/SidebarMonitor';
 import CameraView3D from './components/CameraView3D';
 import Timeline from './components/Timeline';
+import VideoTrack from './components/VideoTrack';
 
 const TAB_DATA = {
   safety: safetyData,
@@ -54,20 +55,42 @@ function formatTimestamp(timestamp) {
   });
 }
 
+function createVideoEntry(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const probe = document.createElement('video');
+
+    probe.preload = 'metadata';
+    probe.onloadedmetadata = () => {
+      resolve({
+        id: `${file.name}-${file.lastModified}-${Math.random().toString(16).slice(2)}`,
+        name: file.name,
+        url,
+        durationSeconds: Number.isFinite(probe.duration) ? probe.duration : 0,
+      });
+    };
+    probe.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error(`Failed to read video metadata for ${file.name}.`));
+    };
+    probe.src = url;
+  });
+}
+
 function PlaybackPanel({ frameIndex, totalFrames, onFrameChange }) {
   if (!totalFrames) {
     return (
-      <div className="timeline playback-panel">
+      <>
         <div className="playback-header">
           <strong>Inference Playback</strong>
           <span>Waiting for frame data.</span>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="timeline playback-panel">
+    <>
       <div className="playback-header">
         <strong>Inference Playback</strong>
         <span>Frame {frameIndex + 1} / {totalFrames}</span>
@@ -79,7 +102,7 @@ function PlaybackPanel({ frameIndex, totalFrames, onFrameChange }) {
         value={Math.min(frameIndex, totalFrames - 1)}
         onChange={(event) => onFrameChange(Number(event.target.value))}
       />
-    </div>
+    </>
   );
 }
 
@@ -99,6 +122,8 @@ function App() {
   const [sceneMode, setSceneMode] = useState('demo');
 
   const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadedVideos, setUploadedVideos] = useState([]);
+  const [selectedVideoId, setSelectedVideoId] = useState(null);
   const [trajLength, setTrajLength] = useState('256');
   const [guidanceMode, setGuidanceMode] = useState('no_hands');
   const [isUploadPanelCollapsed, setIsUploadPanelCollapsed] = useState(false);
@@ -112,10 +137,16 @@ function App() {
   const pollTimerRef = useRef(null);
   const consecutivePollErrorsRef = useRef(0);
   const fileInputRef = useRef(null);
+  const videoInputRef = useRef(null);
+  const uploadedVideosRef = useRef([]);
 
   const sceneData = sceneMode === 'inference' && inferenceSceneData
     ? inferenceSceneData
     : demoSceneData;
+  const selectedVideo = useMemo(
+    () => uploadedVideos.find((video) => video.id === selectedVideoId) || null,
+    [uploadedVideos, selectedVideoId]
+  );
 
   const { warnings, minTime, maxTime } = useMemo(
     () => {
@@ -161,8 +192,15 @@ function App() {
       if (pollTimerRef.current) {
         window.clearInterval(pollTimerRef.current);
       }
+      uploadedVideosRef.current.forEach((video) => {
+        URL.revokeObjectURL(video.url);
+      });
     };
   }, []);
+
+  useEffect(() => {
+    uploadedVideosRef.current = uploadedVideos;
+  }, [uploadedVideos]);
 
   useEffect(() => {
     if (!activeJobId) {
@@ -257,8 +295,32 @@ function App() {
 
   const handleMarkerClick = (warning) => {
     setSelectedWarning(warning);
+    setSelectedVideoId(null);
     setCurrentTime(new Date(warning.timestamp).getTime());
     setFrameIndex(0);
+  };
+
+  const handleSelectVideo = (videoId) => {
+    setSelectedVideoId(videoId);
+    setSelectedWarning(null);
+  };
+
+  const handleVideoUpload = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) {
+      return;
+    }
+
+    setJobError('');
+    try {
+      const nextVideos = await Promise.all(files.map(createVideoEntry));
+      setUploadedVideos((current) => [...current, ...nextVideos]);
+      setSelectedVideoId((current) => current || nextVideos[0]?.id || null);
+    } catch (error) {
+      setJobError(error.message);
+    } finally {
+      event.target.value = '';
+    }
   };
 
   const handleInferenceSubmit = async (event) => {
@@ -359,6 +421,7 @@ function App() {
               <span>{selectedFile ? selectedFile.name : 'No .r3d selected'}</span>
               <span>Length {trajLength}</span>
               <span>{guidanceMode}</span>
+              <span>{uploadedVideos.length} video{uploadedVideos.length === 1 ? '' : 's'}</span>
             </div>
           ) : (
             <div className="inference-form-body" id="upload-panel-body">
@@ -381,6 +444,54 @@ function App() {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {selectedFile ? 'Choose another .r3d' : 'Choose .r3d file'}
+                </button>
+              </div>
+
+              <div className="upload-card upload-card-secondary">
+                <div className="upload-card-copy">
+                  <span className="upload-card-label">Reference videos</span>
+                  <strong>
+                    {uploadedVideos.length > 0
+                      ? `${uploadedVideos.length} video${uploadedVideos.length === 1 ? '' : 's'} selected`
+                      : 'No videos uploaded yet'}
+                  </strong>
+                  <p>Upload multiple videos. They will appear as clickable clips inside the timeline panel.</p>
+                  {uploadedVideos.length > 0 && (
+                    <div className="video-upload-list">
+                      {uploadedVideos.map((video) => (
+                        <span
+                          key={video.id}
+                          className={`video-upload-pill${selectedVideoId === video.id ? ' selected' : ''}`}
+                          onClick={() => handleSelectVideo(video.id)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault();
+                              handleSelectVideo(video.id);
+                            }
+                          }}
+                        >
+                          {video.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={videoInputRef}
+                  className="hidden-file-input"
+                  type="file"
+                  accept="video/*"
+                  multiple
+                  onChange={handleVideoUpload}
+                />
+                <button
+                  type="button"
+                  className="file-picker-button secondary-picker"
+                  onClick={() => videoInputRef.current?.click()}
+                >
+                  Add videos
                 </button>
               </div>
 
@@ -491,6 +602,7 @@ function App() {
             warnings={warnings}
             allWarnings={warnings}
             selectedWarning={selectedWarning}
+            selectedVideo={selectedVideo}
             activeTab={showPlayback ? 'inference' : activeTab}
             titleOverride={showPlayback ? 'Inference Monitor' : undefined}
             emptyMessage={
@@ -523,11 +635,18 @@ function App() {
           )}
 
           {showPlayback ? (
-            <PlaybackPanel
-              frameIndex={frameIndex}
-              totalFrames={totalFrames}
-              onFrameChange={setFrameIndex}
-            />
+            <div className="timeline playback-panel">
+              <PlaybackPanel
+                frameIndex={frameIndex}
+                totalFrames={totalFrames}
+                onFrameChange={setFrameIndex}
+              />
+              <VideoTrack
+                videos={uploadedVideos}
+                selectedVideoId={selectedVideoId}
+                onSelectVideo={handleSelectVideo}
+              />
+            </div>
           ) : (
             <Timeline
               warnings={warnings}
@@ -537,6 +656,9 @@ function App() {
               onTimeChange={setCurrentTime}
               onMarkerClick={handleMarkerClick}
               selectedWarning={selectedWarning}
+              videos={uploadedVideos}
+              selectedVideoId={selectedVideoId}
+              onSelectVideo={handleSelectVideo}
             />
           )}
         </main>
