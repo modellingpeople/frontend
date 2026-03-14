@@ -2,10 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import safetyData from './data/placeholder.json';
 import TabBar from './components/TabBar';
 import PersonSelector from './components/PersonSelector';
-import ViewToggle from './components/ViewToggle';
+import SidebarMonitor from './components/SidebarMonitor';
 import CameraView3D from './components/CameraView3D';
 import Timeline from './components/Timeline';
-import WarningDetail from './components/WarningDetail';
 
 const TAB_DATA = {
   safety: safetyData,
@@ -30,7 +29,6 @@ function getTabDerived(data) {
 function App() {
   const [activeTab, setActiveTab] = useState('safety');
   const [selectedPerson, setSelectedPerson] = useState('All');
-  const [viewMode, setViewMode] = useState('1st');
   const [currentTime, setCurrentTime] = useState(0);
   const [selectedWarning, setSelectedWarning] = useState(null);
   const [frameIndex, setFrameIndex] = useState(0);
@@ -85,45 +83,53 @@ function App() {
     <div className="app">
       <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <header className="toolbar">
-        <PersonSelector
-          persons={persons}
-          selected={selectedPerson}
-          onChange={setSelectedPerson}
-        />
-        <ViewToggle mode={viewMode} onChange={setViewMode} />
-      </header>
+      <div className="dashboard-body">
+        <aside className="sidebar">
+          <SidebarMonitor
+            warnings={filtered}
+            allWarnings={warnings}
+            selectedWarning={selectedWarning}
+            activeTab={activeTab}
+          />
+        </aside>
 
-      {sceneLoading ? (
-        <div className="camera-view" style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#555', fontStyle: 'italic',
-        }}>
-          Loading 3D scene...
-        </div>
-      ) : (
-        <CameraView3D
-          viewMode={viewMode}
-          warning={selectedWarning}
-          frameIndex={frameIndex}
-          onFrameChange={setFrameIndex}
-          meshData={sceneData ? sceneData.mesh : null}
-          pointCloud={sceneData ? sceneData.point_cloud : null}
-          cameraData={sceneData ? sceneData.camera : null}
-        />
-      )}
+        <main className="main-content">
+          {sceneLoading ? (
+            <div className="camera-view" style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#555', fontStyle: 'italic',
+            }}>
+              Loading 3D scene...
+            </div>
+          ) : (
+            <CameraView3D
+              viewMode="3rd"
+              warning={selectedWarning}
+              frameIndex={frameIndex}
+              onFrameChange={setFrameIndex}
+              meshData={sceneData ? sceneData.mesh : null}
+              pointCloud={sceneData ? sceneData.point_cloud : null}
+              cameraData={sceneData ? sceneData.camera : null}
+            />
+          )}
 
-      <Timeline
-        warnings={filtered}
-        minTime={minTime}
-        maxTime={maxTime}
-        currentTime={currentTime}
-        onTimeChange={setCurrentTime}
-        onMarkerClick={handleMarkerClick}
-        selectedWarning={selectedWarning}
-      />
+          <Timeline
+            warnings={filtered}
+            minTime={minTime}
+            maxTime={maxTime}
+            currentTime={currentTime}
+            onTimeChange={setCurrentTime}
+            onMarkerClick={handleMarkerClick}
+            selectedWarning={selectedWarning}
+          />
 
-      <WarningDetail warning={selectedWarning} />
+          <PersonSelector
+            persons={persons}
+            selected={selectedPerson}
+            onChange={setSelectedPerson}
+          />
+        </main>
+      </div>
     </div>
   );
 }

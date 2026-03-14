@@ -25,43 +25,204 @@ body {
   overflow: hidden;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .app {
-    padding: 10px;
-    gap: 10px;
-  }
+/* Dashboard Body — sidebar + main */
+.dashboard-body {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+}
 
-  .tab-bar {
-    flex-wrap: wrap;
-  }
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
 
-  .tab-button {
-    font-size: 12px;
-    padding: 8px 10px;
-  }
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
 
-  .toolbar {
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-  }
+/* Sidebar Monitor */
+.sidebar-monitor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
 
-  .person-selector select {
-    width: 100%;
-  }
+.sidebar-panel {
+  background: #1a1d27;
+  border-radius: 8px;
+  padding: 16px;
+}
 
-  .view-toggle {
-    justify-content: center;
-  }
+.sidebar-stats {
+  flex: 0 0 auto;
+}
 
-  .camera-view {
-    min-height: 120px;
-  }
+.sidebar-detail {
+  flex: 1;
+  min-height: 120px;
+}
 
-  .warning-detail-header {
-    flex-wrap: wrap;
-  }
+.sidebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #5b8def;
+  margin-bottom: 12px;
+}
+
+/* Donut Chart */
+.donut-chart {
+  width: 120px;
+  height: 120px;
+  display: block;
+  margin: 0 auto 12px;
+}
+
+/* Severity Breakdown */
+.severity-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.severity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.severity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.severity-label {
+  flex: 1;
+  text-transform: capitalize;
+  color: #aaa;
+}
+
+.severity-count {
+  font-weight: 600;
+  color: #e0e0e0;
+  min-width: 24px;
+  text-align: right;
+}
+
+/* Safety Score */
+.safety-score {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #2a2d3a;
+  border-radius: 6px;
+}
+
+.safety-score-label {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.safety-score-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.safety-score-value.good { color: #22c55e; }
+.safety-score-value.warn { color: #eab308; }
+.safety-score-value.bad { color: #ef4444; }
+
+/* Selected Warning Detail (sidebar) */
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* Risk Meter (radial) */
+.risk-meter {
+  margin-bottom: 12px;
+}
+
+.risk-meter-arc {
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  margin: 0 auto;
+}
+
+.risk-meter-label-row {
+  text-align: center;
+  margin-top: 2px;
+}
+
+.risk-meter-level {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.sidebar-empty {
+  color: #555;
+  font-style: italic;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Severity badge (shared) */
+.severity-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.severity-badge.critical { background: #ef4444; color: #fff; }
+.severity-badge.high { background: #f97316; color: #fff; }
+.severity-badge.medium { background: #eab308; color: #1a1a1a; }
+.severity-badge.low { background: #3b82f6; color: #fff; }
+
+.warning-timestamp {
+  font-size: 13px;
+  color: #888;
+}
+
+.warning-person {
+  font-size: 13px;
+  color: #5b8def;
+}
+
+.warning-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #ccc;
 }
 
 /* Tab Bar */
@@ -104,16 +265,6 @@ body {
   font-size: 16px;
 }
 
-/* Toolbar */
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #1a1d27;
-  padding: 12px 16px;
-  border-radius: 8px;
-}
-
 /* Person Selector */
 .person-selector select {
   background: #2a2d3a;
@@ -127,36 +278,6 @@ body {
 
 .person-selector select:focus {
   outline: none;
-  border-color: #5b8def;
-}
-
-/* View Toggle */
-.view-toggle {
-  display: flex;
-  gap: 0;
-}
-
-.view-toggle button {
-  padding: 8px 16px;
-  border: 1px solid #3a3d4a;
-  background: #2a2d3a;
-  color: #888;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.view-toggle button:first-child {
-  border-radius: 6px 0 0 6px;
-}
-
-.view-toggle button:last-child {
-  border-radius: 0 6px 6px 0;
-}
-
-.view-toggle button.active {
-  background: #5b8def;
-  color: #fff;
   border-color: #5b8def;
 }
 
@@ -251,55 +372,38 @@ body {
   margin-top: 4px;
 }
 
-/* Warning Detail */
-.warning-detail {
-  background: #1a1d27;
-  border-radius: 8px;
-  padding: 16px 20px;
-  min-height: 80px;
+/* Responsive: stack sidebar above main on narrow screens */
+@media (max-width: 768px) {
+  .dashboard-body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-height: 300px;
+  }
 }
 
-.warning-detail.empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #555;
-  font-style: italic;
-}
+@media (max-width: 600px) {
+  .app {
+    padding: 10px;
+    gap: 10px;
+  }
 
-.warning-detail-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
+  .tab-bar {
+    flex-wrap: wrap;
+  }
 
-.severity-badge {
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+  .tab-button {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
 
-.severity-badge.critical { background: #ef4444; color: #fff; }
-.severity-badge.high { background: #f97316; color: #fff; }
-.severity-badge.medium { background: #eab308; color: #1a1a1a; }
-.severity-badge.low { background: #3b82f6; color: #fff; }
+  .person-selector select {
+    width: 100%;
+  }
 
-.warning-timestamp {
-  font-size: 13px;
-  color: #888;
-}
-
-.warning-person {
-  font-size: 13px;
-  color: #5b8def;
-}
-
-.warning-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #ccc;
+  .camera-view {
+    min-height: 120px;
+  }
 }

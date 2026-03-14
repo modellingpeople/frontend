@@ -12,7 +12,6 @@ const SEVERITY_COLORS = {
 };
 
 function CameraView3D({
-  viewMode,
   warning,
   frameIndex,
   onFrameChange,
@@ -112,14 +111,6 @@ function CameraView3D({
     ? (SEVERITY_COLORS[warning.severity] || '#5b8def')
     : '#5b8def';
 
-  // Current camera pose
-  const currentCameraPose = useMemo(() => {
-    if (!cameraData || !cameraData.frames || !cameraData.frames[currentMeshFrameIdx]) {
-      return null;
-    }
-    return cameraData.frames[currentMeshFrameIdx];
-  }, [cameraData, currentMeshFrameIdx]);
-
   return (
     <div className="camera-view">
       <Canvas
@@ -147,8 +138,6 @@ function CameraView3D({
         )}
 
         <CameraController
-          viewMode={viewMode}
-          cameraPose={currentCameraPose}
           meshCentroid={meshCentroid}
         />
 
