@@ -35,17 +35,19 @@ export const analyzeWithGemini = async (
   const base64Data = base64Image.split(',')[1];
   
   // API Configuration
-  const API_KEY = "AIzaSyCGvRR2vVUGWeDFYMGKbZyp0fxsduc4qrI"; 
+  const API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
   const MODEL_NAME = "gemini-2.5-flash"; 
   const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
-const payload = {
-  contents: [{
-    parts: [
-      { inline_data: { mime_type: "image/png", data: base64Data } },
-      { text: "Analyze this 3D pose and environment.  You must limit your answer to 40 words. Do not describe the point cloud environment. Follow these tasks: 1. Focus on the purple model of the person and classify their pose. Are they sat down, standing, off balance, straining their back? 2. Based on that identify any safety risks related to their pose and surroundings." }
-    ]
-  }],
+  console.log("My API Key is:", API_KEY);
+
+  const payload = {
+    contents: [{
+      parts: [
+        { inline_data: { mime_type: "image/png", data: base64Data } },
+        { text: "Analyze this 3D pose and environment.  You must limit your answer to 40 words. Do not describe the point cloud environment. Follow these tasks: 1. Focus on the purple model of the person and classify their pose. Are they sat down, standing, off balance, straining their back? 2. Based on that identify any safety risks related to their pose and surroundings." }
+      ]
+    }],
 
   // generationConfig: {
   //   maxOutputTokens: 5, // This physically prevents a long response

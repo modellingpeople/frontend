@@ -1,3 +1,6 @@
 node_modules
 build
 .vs
+.env
+.env.local
+.env.*.local
