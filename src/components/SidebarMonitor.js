@@ -114,6 +114,13 @@ function formatTimestamp(iso) {
   });
 }
 
+function formatDuration(seconds) {
+  const totalSeconds = Math.max(0, Math.round(seconds || 0));
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
 function DonutChart({ counts, total }) {
   const radius = 40;
   const stroke = 10;
@@ -160,6 +167,7 @@ function SidebarMonitor({
   warnings,
   allWarnings,
   selectedWarning,
+  selectedVideo,
   activeTab,
   titleOverride,
   aiAnalysis, // Added prop from App.jsx
@@ -247,6 +255,23 @@ function SidebarMonitor({
             ) : (
               <p className="warning-text">{selectedWarning.text}</p>
             )}
+          </>
+        ) : selectedVideo ? (
+          <>
+            <div className="detail-header">
+              <span className="severity-badge low">video</span>
+            </div>
+            <video
+              className="sidebar-video-player"
+              src={selectedVideo.url}
+              controls
+              preload="metadata"
+            />
+            <div className="detail-meta">
+              <span className="warning-timestamp">{selectedVideo.name}</span>
+              <span className="warning-person">{formatDuration(selectedVideo.durationSeconds)}</span>
+            </div>
+            <p className="warning-text">Uploaded reference clip available from the timeline video track.</p>
           </>
         ) : (
           <p className="sidebar-empty">{emptyMessage}</p>

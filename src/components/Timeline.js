@@ -1,11 +1,23 @@
 import React from 'react';
+import VideoTrack from './VideoTrack';
 
 function formatDate(ms) {
   const d = new Date(ms);
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-function Timeline({ warnings, minTime, maxTime, currentTime, onTimeChange, onMarkerClick, selectedWarning }) {
+function Timeline({
+  warnings,
+  minTime,
+  maxTime,
+  currentTime,
+  onTimeChange,
+  onMarkerClick,
+  selectedWarning,
+  videos = [],
+  selectedVideoId = null,
+  onSelectVideo = () => {},
+}) {
   const range = maxTime - minTime;
 
   return (
@@ -53,6 +65,11 @@ function Timeline({ warnings, minTime, maxTime, currentTime, onTimeChange, onMar
         <span>{formatDate(minTime)}</span>
         <span>{formatDate(maxTime)}</span>
       </div>
+      <VideoTrack
+        videos={videos}
+        selectedVideoId={selectedVideoId}
+        onSelectVideo={onSelectVideo}
+      />
     </div>
   );
 }
