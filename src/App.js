@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import safetyData from './data/placeholder.json';
 import TabBar from './components/TabBar';
-import PersonSelector from './components/PersonSelector';
+
 import SidebarMonitor from './components/SidebarMonitor';
 import CameraView3D from './components/CameraView3D';
 import Timeline from './components/Timeline';
@@ -19,16 +19,15 @@ try { TAB_DATA.rehab_fitness = require('./data/rehab_fitness.json'); } catch (e)
 function getTabDerived(data) {
   if (!data) return { warnings: [], persons: [], minTime: 0, maxTime: 0 };
   const { warnings } = data;
-  const persons = [...new Set(warnings.map(w => w.person))].sort();
   const timestamps = warnings.map(w => new Date(w.timestamp).getTime());
   const minTime = Math.min(...timestamps);
   const maxTime = Math.max(...timestamps);
-  return { warnings, persons, minTime, maxTime };
+  return { warnings, minTime, maxTime };
 }
 
 function App() {
   const [activeTab, setActiveTab] = useState('safety');
-  const [selectedPerson, setSelectedPerson] = useState('All');
+
   const [currentTime, setCurrentTime] = useState(0);
   const [selectedWarning, setSelectedWarning] = useState(null);
   const [frameIndex, setFrameIndex] = useState(0);
@@ -37,14 +36,13 @@ function App() {
   const [sceneData, setSceneData] = useState(null);
   const [sceneLoading, setSceneLoading] = useState(true);
 
-  const { warnings, persons, minTime, maxTime } = useMemo(
+  const { warnings, minTime, maxTime } = useMemo(
     () => getTabDerived(TAB_DATA[activeTab]),
     [activeTab]
   );
 
   // Reset per-tab state on tab switch
   useEffect(() => {
-    setSelectedPerson('All');
     setSelectedWarning(null);
     setFrameIndex(0);
     setCurrentTime(minTime);
@@ -66,13 +64,6 @@ function App() {
       });
   }, []);
 
-  const filtered = useMemo(
-    () => selectedPerson === 'All'
-      ? warnings
-      : warnings.filter(w => w.person === selectedPerson),
-    [selectedPerson, warnings]
-  );
-
   const handleMarkerClick = (warning) => {
     setSelectedWarning(warning);
     setCurrentTime(new Date(warning.timestamp).getTime());
@@ -86,7 +77,7 @@ function App() {
       <div className="dashboard-body">
         <aside className="sidebar">
           <SidebarMonitor
-            warnings={filtered}
+            warnings={warnings}
             allWarnings={warnings}
             selectedWarning={selectedWarning}
             activeTab={activeTab}
@@ -114,19 +105,13 @@ function App() {
           )}
 
           <Timeline
-            warnings={filtered}
+            warnings={warnings}
             minTime={minTime}
             maxTime={maxTime}
             currentTime={currentTime}
             onTimeChange={setCurrentTime}
             onMarkerClick={handleMarkerClick}
             selectedWarning={selectedWarning}
-          />
-
-          <PersonSelector
-            persons={persons}
-            selected={selectedPerson}
-            onChange={setSelectedPerson}
           />
         </main>
       </div>

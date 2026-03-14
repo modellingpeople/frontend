@@ -265,21 +265,6 @@ body {
   font-size: 16px;
 }
 
-/* Person Selector */
-.person-selector select {
-  background: #2a2d3a;
-  color: #e0e0e0;
-  border: 1px solid #3a3d4a;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.person-selector select:focus {
-  outline: none;
-  border-color: #5b8def;
-}
 
 /* Camera View */
 .camera-view {
@@ -397,10 +382,6 @@ body {
   .tab-button {
     font-size: 12px;
     padding: 8px 10px;
-  }
-
-  .person-selector select {
-    width: 100%;
   }
 
   .camera-view {
