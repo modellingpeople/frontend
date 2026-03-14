@@ -398,8 +398,8 @@ function App() {
     <div className="app">
       <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <section className="inference-console">
-        <form className="inference-form" onSubmit={handleInferenceSubmit}>
+      <section className={`inference-console${isUploadPanelCollapsed ? ' collapsed' : ''}`}>
+        <form className={`inference-form${isUploadPanelCollapsed ? ' collapsed' : ''}`} onSubmit={handleInferenceSubmit}>
           <div className="inference-form-header">
             <div>
               <p className="inference-form-kicker">Inference Upload</p>
@@ -416,14 +416,7 @@ function App() {
             </button>
           </div>
 
-          {isUploadPanelCollapsed ? (
-            <div className="inference-collapsed-summary" id="upload-panel-body">
-              <span>{selectedFile ? selectedFile.name : 'No .r3d selected'}</span>
-              <span>Length {trajLength}</span>
-              <span>{guidanceMode}</span>
-              <span>{uploadedVideos.length} video{uploadedVideos.length === 1 ? '' : 's'}</span>
-            </div>
-          ) : (
+          {isUploadPanelCollapsed ? null : (
             <div className="inference-form-body" id="upload-panel-body">
               <div className="upload-card">
                 <div className="upload-card-copy">

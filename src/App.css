@@ -45,6 +45,39 @@ body {
   align-content: start;
 }
 
+.inference-form.collapsed {
+  padding: 10px 16px;
+  gap: 0;
+}
+
+.inference-form.collapsed .inference-form-header {
+  align-items: center;
+}
+
+.inference-form.collapsed .inference-form-kicker {
+  display: none;
+}
+
+.inference-form.collapsed .inference-form-header h2 {
+  font-size: 14px;
+}
+
+.inference-console.collapsed {
+  grid-template-columns: 1fr auto;
+}
+
+.inference-console.collapsed .inference-status {
+  padding: 10px 16px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.inference-console.collapsed .inference-status-row {
+  gap: 6px;
+}
+
 .inference-form-header {
   display: flex;
   justify-content: space-between;
@@ -84,8 +117,9 @@ body {
 
 .inference-collapsed-summary {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .inference-collapsed-summary span {
@@ -93,8 +127,8 @@ body {
   border: 1px solid #3a3d4a;
   border-radius: 999px;
   color: #cbd0df;
-  font-size: 12px;
-  padding: 6px 10px;
+  font-size: 11px;
+  padding: 4px 8px;
 }
 
 .upload-card {
