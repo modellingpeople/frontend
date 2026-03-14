@@ -1,28 +1,56 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import data from './data/placeholder.json';
+import safetyData from './data/placeholder.json';
+import TabBar from './components/TabBar';
 import PersonSelector from './components/PersonSelector';
 import ViewToggle from './components/ViewToggle';
-import CameraView from './components/CameraView';
 import CameraView3D from './components/CameraView3D';
 import Timeline from './components/Timeline';
 import WarningDetail from './components/WarningDetail';
 
-const { meta, warnings } = data;
-const persons = [...new Set(warnings.map(w => w.person))].sort();
-const timestamps = warnings.map(w => new Date(w.timestamp).getTime());
-const minTime = Math.min(...timestamps);
-const maxTime = Math.max(...timestamps);
+const TAB_DATA = {
+  safety: safetyData,
+  elder_care: null,
+  rehab_fitness: null,
+};
+
+// Lazy-load tab data
+try { TAB_DATA.elder_care = require('./data/elder_care.json'); } catch (e) {}
+try { TAB_DATA.rehab_fitness = require('./data/rehab_fitness.json'); } catch (e) {}
+
+function getTabDerived(data) {
+  if (!data) return { meta: { joint_names: [], bones: [] }, warnings: [], persons: [], minTime: 0, maxTime: 0 };
+  const { meta, warnings } = data;
+  const persons = [...new Set(warnings.map(w => w.person))].sort();
+  const timestamps = warnings.map(w => new Date(w.timestamp).getTime());
+  const minTime = Math.min(...timestamps);
+  const maxTime = Math.max(...timestamps);
+  return { meta, warnings, persons, minTime, maxTime };
+}
 
 function App() {
+  const [activeTab, setActiveTab] = useState('safety');
   const [selectedPerson, setSelectedPerson] = useState('All');
   const [viewMode, setViewMode] = useState('1st');
-  const [currentTime, setCurrentTime] = useState(minTime);
+  const [currentTime, setCurrentTime] = useState(0);
   const [selectedWarning, setSelectedWarning] = useState(null);
   const [frameIndex, setFrameIndex] = useState(0);
 
-  // 3D scene data
+  // 3D scene data (only for safety tab)
   const [sceneData, setSceneData] = useState(null);
   const [sceneLoading, setSceneLoading] = useState(true);
+
+  const { meta, warnings, persons, minTime, maxTime } = useMemo(
+    () => getTabDerived(TAB_DATA[activeTab]),
+    [activeTab]
+  );
+
+  // Reset per-tab state on tab switch
+  useEffect(() => {
+    setSelectedPerson('All');
+    setSelectedWarning(null);
+    setFrameIndex(0);
+    setCurrentTime(minTime);
+  }, [activeTab, minTime]);
 
   // Load 3D data from public/data/scene3d.json
   useEffect(() => {
@@ -44,7 +72,7 @@ function App() {
     () => selectedPerson === 'All'
       ? warnings
       : warnings.filter(w => w.person === selectedPerson),
-    [selectedPerson]
+    [selectedPerson, warnings]
   );
 
   const handleMarkerClick = (warning) => {
@@ -53,10 +81,12 @@ function App() {
     setFrameIndex(0);
   };
 
-  const has3D = sceneData && sceneData.mesh && sceneData.mesh.frames.length > 0;
+  const has3D = activeTab === 'safety' && sceneData && sceneData.mesh && sceneData.mesh.frames.length > 0;
 
   return (
     <div className="app">
+      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+
       <header className="toolbar">
         <PersonSelector
           persons={persons}
@@ -66,7 +96,7 @@ function App() {
         <ViewToggle mode={viewMode} onChange={setViewMode} />
       </header>
 
-      {sceneLoading ? (
+      {activeTab === 'safety' && sceneLoading ? (
         <div className="camera-view" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: '#555', fontStyle: 'italic',

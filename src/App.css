@@ -32,6 +32,15 @@ body {
     gap: 10px;
   }
 
+  .tab-bar {
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
   .toolbar {
     flex-direction: column;
     gap: 10px;
@@ -53,6 +62,46 @@ body {
   .warning-detail-header {
     flex-wrap: wrap;
   }
+}
+
+/* Tab Bar */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: #1a1d27;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tab-button:hover {
+  background: #2a2d3a;
+  color: #ccc;
+}
+
+.tab-button.active {
+  background: #5b8def;
+  color: #fff;
+}
+
+.tab-icon {
+  font-size: 16px;
 }
 
 /* Toolbar */
