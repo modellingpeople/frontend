@@ -122,6 +122,7 @@ body {
   min-height: 0;
   border: 1px solid #2a2d3a;
   overflow: hidden;
+  position: relative;
 }
 
 .camera-view canvas {
