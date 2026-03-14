@@ -113,6 +113,8 @@ function App() {
   const [selectedWarning, setSelectedWarning] = useState(null);
   const [frameIndex, setFrameIndex] = useState(0);
 
+  const [aiAnalysis, setAiAnalysis] = useState("");
+
   const [demoSceneData, setDemoSceneData] = useState(null);
   const [demoSceneLoading, setDemoSceneLoading] = useState(true);
   const [demoSceneError, setDemoSceneError] = useState('');
@@ -298,6 +300,8 @@ function App() {
     setSelectedVideoId(null);
     setCurrentTime(new Date(warning.timestamp).getTime());
     setFrameIndex(0);
+
+    setAiAnalysis(""); // Clear previous AI analysis when selecting a new warning
   };
 
   const handleSelectVideo = (videoId) => {
@@ -597,6 +601,7 @@ function App() {
             selectedWarning={selectedWarning}
             selectedVideo={selectedVideo}
             activeTab={showPlayback ? 'inference' : activeTab}
+            aiAnalysis={aiAnalysis}
             titleOverride={showPlayback ? 'Inference Monitor' : undefined}
             emptyMessage={
               showPlayback
@@ -620,6 +625,11 @@ function App() {
               pointCloud={sceneData ? sceneData.point_cloud : null}
               cameraData={sceneData ? sceneData.camera : null}
               overlayMessage={overlayMessage}
+
+              onAnalysisComplete={(text) => {
+                console.log("AI TEXT", text);
+                setAiAnalysis(text);
+              }}
             />
           ) : (
             <div className="camera-view camera-empty">
