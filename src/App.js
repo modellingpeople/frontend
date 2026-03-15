@@ -113,12 +113,14 @@ function App() {
   const [selectedWarning, setSelectedWarning] = useState(null);
   const [frameIndex, setFrameIndex] = useState(0);
 
+
+  const [warningSceneData, setWarningSceneData] = useState(null);
+  const [warningSceneLoading, setWarningSceneLoading] = useState(false);
+  const [warningSceneError, setWarningSceneError] = useState('');
+  const warningSceneCacheRef = useRef({});
+
   const [aiAnalysis, setAiAnalysis] = useState("");
-
-  const [demoSceneData, setDemoSceneData] = useState(null);
-  const [demoSceneLoading, setDemoSceneLoading] = useState(true);
-  const [demoSceneError, setDemoSceneError] = useState('');
-
+  
   const [inferenceSceneData, setInferenceSceneData] = useState(null);
   const [inferenceSceneLoading, setInferenceSceneLoading] = useState(false);
   const [sceneMode, setSceneMode] = useState('demo');
@@ -135,6 +137,7 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLaunchingVisualizer, setIsLaunchingVisualizer] = useState(false);
   const [activeJobId, setActiveJobId] = useState(null);
+  const [showEmbeddedVisualizer, setShowEmbeddedVisualizer] = useState(false);
 
   const pollTimerRef = useRef(null);
   const consecutivePollErrorsRef = useRef(0);
@@ -144,7 +147,7 @@ function App() {
 
   const sceneData = sceneMode === 'inference' && inferenceSceneData
     ? inferenceSceneData
-    : demoSceneData;
+    : warningSceneData;
   const selectedVideo = useMemo(
     () => uploadedVideos.find((video) => video.id === selectedVideoId) || null,
     [uploadedVideos, selectedVideoId]
@@ -159,8 +162,8 @@ function App() {
     },
     [activeTab, inferenceSceneData, sceneMode]
   );
-  const sceneLoading = sceneMode === 'inference' ? inferenceSceneLoading : demoSceneLoading;
-  const sceneError = sceneMode === 'inference' ? jobError : demoSceneError;
+  const sceneLoading = sceneMode === 'inference' ? inferenceSceneLoading : warningSceneLoading;
+  const sceneError = sceneMode === 'inference' ? jobError : warningSceneError;
   const showPlayback = sceneMode === 'inference' && warnings.length === 0;
   const totalFrames = sceneData?.mesh?.frames?.length || 0;
   const jobInFlight = Boolean(job && ['queued', 'running'].includes(job.status));
@@ -171,23 +174,36 @@ function App() {
     setCurrentTime(warnings.length > 0 ? minTime : 0);
   }, [activeTab, minTime, sceneMode, warnings.length]);
 
-  useEffect(() => {
-    fetch('/data/scene3d.json')
-      .then(res => {
-        if (!res.ok) throw new Error('No 3D data available');
-        return res.json();
-      })
-      .then(data => {
-        setDemoSceneData(data);
-        setDemoSceneError('');
-      })
-      .catch(() => {
-        setDemoSceneError('No demo 3D scene is available.');
-      })
-      .finally(() => {
-        setDemoSceneLoading(false);
-      });
-  }, []);
+  const loadWarningScene = async (warning) => {
+    const sceneFile = warning.sceneFile;
+    if (!sceneFile) {
+      setWarningSceneData(null);
+      setWarningSceneError('No scene file for this warning.');
+      return;
+    }
+
+    // Check cache
+    if (warningSceneCacheRef.current[sceneFile]) {
+      setWarningSceneData(warningSceneCacheRef.current[sceneFile]);
+      setWarningSceneError('');
+      return;
+    }
+
+    setWarningSceneLoading(true);
+    setWarningSceneError('');
+    try {
+      const res = await fetch(`/data/${sceneFile}`);
+      if (!res.ok) throw new Error('Scene not found');
+      const data = await res.json();
+      warningSceneCacheRef.current[sceneFile] = data;
+      setWarningSceneData(data);
+    } catch {
+      setWarningSceneError('Failed to load 3D scene.');
+      setWarningSceneData(null);
+    } finally {
+      setWarningSceneLoading(false);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -219,6 +235,7 @@ function App() {
     };
 
     const finalizeJob = async (payload) => {
+      let resolvedJob = payload;
       try {
         const artifactsPayload = await fetchArtifacts(payload.job_id);
         if (!cancelled) {
@@ -252,6 +269,25 @@ function App() {
         if (!cancelled) {
           setInferenceSceneLoading(false);
         }
+      }
+
+      try {
+        const visualizerPayload = await launchVisualizer(payload.job_id);
+        if (!cancelled) {
+          resolvedJob = visualizerPayload;
+          setJob(visualizerPayload);
+          if (visualizerPayload.visualizer_url) {
+            setShowEmbeddedVisualizer(true);
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setJobError((current) => current || error.message);
+        }
+      }
+
+      if (!cancelled && resolvedJob.visualizer_url) {
+        setShowEmbeddedVisualizer(true);
       }
     };
 
@@ -302,6 +338,8 @@ function App() {
     setFrameIndex(0);
 
     setAiAnalysis(""); // Clear previous AI analysis when selecting a new warning
+    loadWarningScene(warning);
+
   };
 
   const handleSelectVideo = (videoId) => {
@@ -371,9 +409,8 @@ function App() {
   };
 
   const handleUseDemoScene = () => {
-    if (demoSceneData) {
-      setSceneMode('demo');
-    }
+    setSceneMode('demo');
+    setShowEmbeddedVisualizer(false);
   };
 
   const handleLaunchVisualizer = async () => {
@@ -387,6 +424,9 @@ function App() {
     try {
       const payload = await launchVisualizer(job.job_id);
       setJob(payload);
+      if (payload.visualizer_url) {
+        setShowEmbeddedVisualizer(true);
+      }
     } catch (error) {
       setJobError(error.message);
     } finally {
@@ -525,7 +565,7 @@ function App() {
                   type="button"
                   className="secondary"
                   onClick={handleUseDemoScene}
-                  disabled={!demoSceneData || sceneMode === 'demo'}
+                  disabled={sceneMode === 'demo'}
                 >
                   Use demo scene
                 </button>
@@ -612,7 +652,16 @@ function App() {
         </aside>
 
         <main className="main-content">
-          {sceneLoading ? (
+          {showEmbeddedVisualizer && job?.visualizer_url ? (
+            <div className="camera-view camera-visualizer">
+              <iframe
+                title="Trajectory visualizer"
+                src={job.visualizer_url}
+                className="camera-visualizer-iframe"
+                allow="autoplay; fullscreen"
+              />
+            </div>
+          ) : sceneLoading ? (
             <div className="camera-view camera-empty">
               {sceneMode === 'inference' ? 'Preparing inferred 3D scene...' : 'Loading 3D scene...'}
             </div>
@@ -644,6 +693,15 @@ function App() {
                 totalFrames={totalFrames}
                 onFrameChange={setFrameIndex}
               />
+              {job?.visualizer_url && (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setShowEmbeddedVisualizer((current) => !current)}
+                >
+                  {showEmbeddedVisualizer ? 'Show inferred scene' : 'Show embedded visualizer'}
+                </button>
+              )}
               <VideoTrack
                 videos={uploadedVideos}
                 selectedVideoId={selectedVideoId}

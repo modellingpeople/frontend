@@ -2,8 +2,9 @@ import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { captureElement, analyzeWithGemini } from './screenshotUtils';
 import BodyMesh from './BodyMesh';
-import PointCloudView from './PointCloudView';
+
 import CameraController from './CameraController';
+import SceneModel from './SceneModel';
 
 const SEVERITY_COLORS = {
   critical: '#ef4444',
@@ -22,6 +23,7 @@ function CameraView3D({
   onAnalysisComplete, // Callback to send text to SidebarMonitor
 }) {
   const animRef = useRef(null);
+
   const viewRef = useRef(null);
   
   const [lastScreenshot, setLastScreenshot] = useState(null);
@@ -50,6 +52,31 @@ function CameraView3D({
       setLastScreenshot(imageToAnalyze);
     }
 
+  const meshFrames = useMemo(() => {
+    const frames = meshData?.frames;
+    if (!Array.isArray(frames) || frames.length === 0) {
+      return [];
+    }
+
+    // Some payloads can arrive with frame entries out of order.
+    // Normalize to ascending frame_num so playback always moves forward.
+    const hasFrameNumbers = frames.every((frame) => Number.isFinite(frame?.frame_num));
+    if (!hasFrameNumbers) {
+      return frames;
+    }
+
+    return [...frames].sort((a, b) => a.frame_num - b.frame_num);
+  }, [meshData]);
+
+  // Auto-advance frames when a warning is selected
+  useEffect(() => {
+    if (!warning || meshFrames.length === 0) return;
+
+    const meshStart = warning.mesh_frame_start || 0;
+    const totalMeshFrames = meshFrames.length;
+    const numFrames = totalMeshFrames - meshStart;
+
+
     setIsAnalyzing(true);
     // Call the external utility
     const result = await analyzeWithGemini(imageToAnalyze, "analyze this image");
@@ -73,18 +100,38 @@ function CameraView3D({
       onFrameChange(frame);
     }, 1000 / 15);
     return () => clearInterval(animRef.current);
-  }, [warning, meshData, onFrameChange]);
+  }, [warning, meshFrames, onFrameChange]);
 
   // --- 3D Data Memos ---
   const currentMeshFrameIdx = useMemo(() => {
-    if (!meshData?.frames?.length) return 0;
-    const meshStart = warning ? (warning.mesh_frame_start || 0) : 0;
-    return Math.min(meshStart + frameIndex, meshData.frames.length - 1);
-  }, [warning, frameIndex, meshData]);
 
-  const currentVerts = useMemo(() => 
-    meshData?.frames[currentMeshFrameIdx]?.verts || null
-  , [meshData, currentMeshFrameIdx]);
+    if (meshFrames.length === 0) return 0;
+    if (!warning) {
+      return Math.min(frameIndex, meshFrames.length - 1);
+    }
+    const meshStart = warning.mesh_frame_start || 0;
+    return Math.min(meshStart + frameIndex, meshFrames.length - 1);
+  }, [warning, frameIndex, meshFrames]);
+
+  // Current frame verts (as nested array for BodyMesh)
+  const currentVerts = useMemo(() => {
+    if (!meshFrames[currentMeshFrameIdx]) return null;
+    return meshFrames[currentMeshFrameIdx].verts;
+  }, [meshFrames, currentMeshFrameIdx]);
+
+  // Mesh centroid — compute from first frame once, then update from current
+  const initialCentroid = useMemo(() => {
+    if (!meshFrames[0]) return null;
+    const verts = meshFrames[0].verts;
+    let cx = 0, cy = 0, cz = 0;
+    for (let i = 0; i < verts.length; i++) {
+      cx += verts[i][0];
+      cy += verts[i][1];
+      cz += verts[i][2];
+    }
+    return [cx / verts.length, cy / verts.length, cz / verts.length];
+  }, [meshFrames]);
+
 
   const meshCentroid = useMemo(() => {
     if (!currentVerts?.length) return [0, 1, 0];
@@ -124,22 +171,30 @@ function CameraView3D({
   return (
     <div ref={viewRef} className="camera-view" style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       <Canvas
-        camera={{ fov: 60, near: 0.01, far: 200, position: [1.5, 1, 2.5] }}
-        gl={{ antialias: true, preserveDrawingBuffer: true }}
+
+        camera={{ fov: 60, near: 0.01, far: 1000, position: [0, 5, 20] }}
+        gl={{ antialias: true }}
+
         style={{ background: '#12151e' }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 10, 5]} intensity={0.8} />
         {currentVerts && meshData && (
-          <BodyMesh 
-            faces={meshData.faces} 
-            verts={currentVerts} 
-            color={warning ? (SEVERITY_COLORS[warning.severity] || '#5b8def') : '#5b8def'} 
+
+          <BodyMesh
+            faces={meshData.faces}
+            verts={currentVerts}
+            color={severityColor}
           />
         )}
-        {pointCloud && <PointCloudView positions={pointCloud.positions} colors={pointCloud.colors} />}
-        <CameraController meshCentroid={meshCentroid} />
-        <gridHelper args={[20, 20, '#2a2d3a', '#1e2230']} />
+
+
+        <CameraController
+          meshCentroid={meshCentroid}
+        />
+
+        <SceneModel />
+
       </Canvas>
 
       {/* LOWER LEFT CONTROLS */}
@@ -166,6 +221,22 @@ function CameraView3D({
           {isAnalyzing ? "⌛ Analyzing..." : "✨ AI Check"}
         </button>
       </div>
+
+      {/* Overlay: frame counter */}
+      {meshFrames.length > 0 && (
+        <div style={{
+          position: 'absolute',
+          bottom: 12,
+          right: 16,
+          color: '#444',
+          fontFamily: 'monospace',
+          fontSize: 11,
+          pointerEvents: 'none',
+        }}>
+          Frame {currentMeshFrameIdx + 1}/{meshFrames.length}
+        </div>
+      )}
+
 
       {/* Frame Counter */}
       {meshData?.frames?.length > 0 && (

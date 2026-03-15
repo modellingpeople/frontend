@@ -38,7 +38,7 @@ function CameraController({ meshCentroid }) {
       enableDamping
       dampingFactor={0.1}
       minDistance={0.5}
-      maxDistance={20}
+      maxDistance={500}
     />
   );
 }
