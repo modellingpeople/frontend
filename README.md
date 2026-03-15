@@ -1,5 +1,13 @@
 # POPE Frontend
 
+<p align="center">
+<br>
+<br>
+<img src="https://github.com/modellingpeople/frontend/raw/main/PopeIcon.png" alt="PoPe Logo" width="300">
+<br>
+<br>
+</p>
+
 Real-time safety monitoring dashboard that visualizes 3D human pose data from [EgoAllo](https://egoallo.github.io/) inference outputs. Built with React and Three.js.
 
 Part of the [Modelling People](https://github.com/modellingpeople) organization.
