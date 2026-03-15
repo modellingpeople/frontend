@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "source": "egoallo"
+  },
+  "warnings": [
+    {
+      "timestamp": "2026-03-14T08:15:00",
+      "severity": "critical",
+      "text": "Worker detected in close proximity to active machinery without proper lockout/tagout procedure. Immediate intervention required.",
+      "person": "Person A",
+      "sceneFile": "scene_1.json"
+    },
+    {
+      "timestamp": "2026-03-14T10:00:00",
+      "severity": "high",
+      "text": "Person reaching dangerously close to rotating blade guard. Left hand within 15cm of hazard zone.",
+      "person": "Person B",
+      "sceneFile": "scene_2.json"
+    },
+    {
+      "timestamp": "2026-03-14T11:45:00",
+      "severity": "critical",
+      "text": "Person entered lockout/tagout zone while machine is energized. Immediate danger.",
+      "person": "Person D",
+      "sceneFile": "scene_8.json"
+    },
+    {
+      "timestamp": "2026-03-14T13:30:00",
+      "severity": "medium",
+      "text": "Person not wearing required safety goggles while operating grinding station.",
+      "person": "Person D",
+      "sceneFile": "scene_4.json"
+    },
+    {
+      "timestamp": "2026-03-14T15:15:00",
+      "severity": "high",
+      "text": "Welding operation detected without proper face shield. Arc flash exposure risk.",
+      "person": "Person A",
+      "sceneFile": "scene_9.json"
+    },
+    {
+      "timestamp": "2026-03-14T17:00:00",
+      "severity": "critical",
+      "text": "Person leaning into conveyor belt zone. Immediate entanglement risk detected.",
+      "person": "Person C",
+      "sceneFile": "scene_3.json"
+    },
+    {
+      "timestamp": "2026-03-14T18:45:00",
+      "severity": "low",
+      "text": "Hard hat slightly tilted, not fully secured. Minor PPE adjustment needed.",
+      "person": "Person C",
+      "sceneFile": "scene_7.json"
+    },
+    {
+      "timestamp": "2026-03-14T20:30:00",
+      "severity": "high",
+      "text": "Person climbing on racking system without fall protection harness.",
+      "person": "Person A",
+      "sceneFile": "scene_5.json"
+    },
+    {
+      "timestamp": "2026-03-14T22:00:00",
+      "severity": "medium",
+      "text": "Two workers in close proximity near press brake. Insufficient clearance for safe operation.",
+      "person": "Person B",
+      "sceneFile": "scene_6.json"
+    },
+    {
+      "timestamp": "2026-03-14T23:45:00",
+      "severity": "low",
+      "text": "Person standing slightly outside designated walkway. Minor positional deviation.",
+      "person": "Person B",
+      "sceneFile": "scene_10.json"
+    }
+  ]
+}
