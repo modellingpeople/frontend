@@ -45,7 +45,7 @@ export const analyzeWithGemini = async (
     contents: [{
       parts: [
         { inline_data: { mime_type: "image/png", data: base64Data } },
-        { text: "Analyze this 3D pose and environment.  You must limit your answer to 40 words. Do not describe the point cloud environment. Follow these tasks: 1. Focus on the purple model of the person and classify their pose. Are they sat down, standing, off balance, straining their back? 2. Based on that identify any safety risks related to their pose and surroundings." }
+        { text: "Analyze this 3D pose and environment.  You must limit your answer to 40 words. Do not describe the point cloud environment. Follow these tasks: 1. Focus on the person figure and classify their pose. Are they sat down, standing, off balance, straining their back? 2. Based on that identify any safety risks related to their pose and surroundings." }
       ]
     }],
 
