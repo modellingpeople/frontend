@@ -113,11 +113,14 @@ function App() {
   const [selectedWarning, setSelectedWarning] = useState(null);
   const [frameIndex, setFrameIndex] = useState(0);
 
+
   const [warningSceneData, setWarningSceneData] = useState(null);
   const [warningSceneLoading, setWarningSceneLoading] = useState(false);
   const [warningSceneError, setWarningSceneError] = useState('');
   const warningSceneCacheRef = useRef({});
 
+  const [aiAnalysis, setAiAnalysis] = useState("");
+  
   const [inferenceSceneData, setInferenceSceneData] = useState(null);
   const [inferenceSceneLoading, setInferenceSceneLoading] = useState(false);
   const [sceneMode, setSceneMode] = useState('demo');
@@ -333,7 +336,10 @@ function App() {
     setSelectedVideoId(null);
     setCurrentTime(new Date(warning.timestamp).getTime());
     setFrameIndex(0);
+
+    setAiAnalysis(""); // Clear previous AI analysis when selecting a new warning
     loadWarningScene(warning);
+
   };
 
   const handleSelectVideo = (videoId) => {
@@ -635,6 +641,7 @@ function App() {
             selectedWarning={selectedWarning}
             selectedVideo={selectedVideo}
             activeTab={showPlayback ? 'inference' : activeTab}
+            aiAnalysis={aiAnalysis}
             titleOverride={showPlayback ? 'Inference Monitor' : undefined}
             emptyMessage={
               showPlayback
@@ -667,6 +674,11 @@ function App() {
               pointCloud={sceneData ? sceneData.point_cloud : null}
               cameraData={sceneData ? sceneData.camera : null}
               overlayMessage={overlayMessage}
+
+              onAnalysisComplete={(text) => {
+                console.log("AI TEXT", text);
+                setAiAnalysis(text);
+              }}
             />
           ) : (
             <div className="camera-view camera-empty">
