@@ -113,9 +113,10 @@ function App() {
   const [selectedWarning, setSelectedWarning] = useState(null);
   const [frameIndex, setFrameIndex] = useState(0);
 
-  const [demoSceneData, setDemoSceneData] = useState(null);
-  const [demoSceneLoading, setDemoSceneLoading] = useState(true);
-  const [demoSceneError, setDemoSceneError] = useState('');
+  const [warningSceneData, setWarningSceneData] = useState(null);
+  const [warningSceneLoading, setWarningSceneLoading] = useState(false);
+  const [warningSceneError, setWarningSceneError] = useState('');
+  const warningSceneCacheRef = useRef({});
 
   const [inferenceSceneData, setInferenceSceneData] = useState(null);
   const [inferenceSceneLoading, setInferenceSceneLoading] = useState(false);
@@ -142,7 +143,7 @@ function App() {
 
   const sceneData = sceneMode === 'inference' && inferenceSceneData
     ? inferenceSceneData
-    : demoSceneData;
+    : warningSceneData;
   const selectedVideo = useMemo(
     () => uploadedVideos.find((video) => video.id === selectedVideoId) || null,
     [uploadedVideos, selectedVideoId]
@@ -157,8 +158,8 @@ function App() {
     },
     [activeTab, inferenceSceneData, sceneMode]
   );
-  const sceneLoading = sceneMode === 'inference' ? inferenceSceneLoading : demoSceneLoading;
-  const sceneError = sceneMode === 'inference' ? jobError : demoSceneError;
+  const sceneLoading = sceneMode === 'inference' ? inferenceSceneLoading : warningSceneLoading;
+  const sceneError = sceneMode === 'inference' ? jobError : warningSceneError;
   const showPlayback = sceneMode === 'inference' && warnings.length === 0;
   const totalFrames = sceneData?.mesh?.frames?.length || 0;
   const jobInFlight = Boolean(job && ['queued', 'running'].includes(job.status));
@@ -169,23 +170,36 @@ function App() {
     setCurrentTime(warnings.length > 0 ? minTime : 0);
   }, [activeTab, minTime, sceneMode, warnings.length]);
 
-  useEffect(() => {
-    fetch('/data/scene3d.json')
-      .then(res => {
-        if (!res.ok) throw new Error('No 3D data available');
-        return res.json();
-      })
-      .then(data => {
-        setDemoSceneData(data);
-        setDemoSceneError('');
-      })
-      .catch(() => {
-        setDemoSceneError('No demo 3D scene is available.');
-      })
-      .finally(() => {
-        setDemoSceneLoading(false);
-      });
-  }, []);
+  const loadWarningScene = async (warning) => {
+    const sceneFile = warning.sceneFile;
+    if (!sceneFile) {
+      setWarningSceneData(null);
+      setWarningSceneError('No scene file for this warning.');
+      return;
+    }
+
+    // Check cache
+    if (warningSceneCacheRef.current[sceneFile]) {
+      setWarningSceneData(warningSceneCacheRef.current[sceneFile]);
+      setWarningSceneError('');
+      return;
+    }
+
+    setWarningSceneLoading(true);
+    setWarningSceneError('');
+    try {
+      const res = await fetch(`/data/${sceneFile}`);
+      if (!res.ok) throw new Error('Scene not found');
+      const data = await res.json();
+      warningSceneCacheRef.current[sceneFile] = data;
+      setWarningSceneData(data);
+    } catch {
+      setWarningSceneError('Failed to load 3D scene.');
+      setWarningSceneData(null);
+    } finally {
+      setWarningSceneLoading(false);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -298,6 +312,7 @@ function App() {
     setSelectedVideoId(null);
     setCurrentTime(new Date(warning.timestamp).getTime());
     setFrameIndex(0);
+    loadWarningScene(warning);
   };
 
   const handleSelectVideo = (videoId) => {
@@ -367,9 +382,7 @@ function App() {
   };
 
   const handleUseDemoScene = () => {
-    if (demoSceneData) {
-      setSceneMode('demo');
-    }
+    setSceneMode('demo');
   };
 
   const handleLaunchVisualizer = async () => {
@@ -521,7 +534,7 @@ function App() {
                   type="button"
                   className="secondary"
                   onClick={handleUseDemoScene}
-                  disabled={!demoSceneData || sceneMode === 'demo'}
+                  disabled={sceneMode === 'demo'}
                 >
                   Use demo scene
                 </button>
