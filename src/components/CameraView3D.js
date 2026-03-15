@@ -160,9 +160,10 @@ function CameraView3D({
     <div ref={viewRef} className="camera-view" style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       <Canvas
         camera={{ fov: 60, near: 0.01, far: 1000, position: [0, 5, 20] }}
-        gl={{ antialias: true }}
+        gl={{ antialias: true , preserveDrawingBuffer: true }}
         style={{ background: '#12151e' }}
       >
+
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 10, 5]} intensity={0.8} />
         
