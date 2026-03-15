@@ -22,13 +22,28 @@ function CameraView3D({
   overlayMessage,
 }) {
   const animRef = useRef(null);
+  const meshFrames = useMemo(() => {
+    const frames = meshData?.frames;
+    if (!Array.isArray(frames) || frames.length === 0) {
+      return [];
+    }
+
+    // Some payloads can arrive with frame entries out of order.
+    // Normalize to ascending frame_num so playback always moves forward.
+    const hasFrameNumbers = frames.every((frame) => Number.isFinite(frame?.frame_num));
+    if (!hasFrameNumbers) {
+      return frames;
+    }
+
+    return [...frames].sort((a, b) => a.frame_num - b.frame_num);
+  }, [meshData]);
 
   // Auto-advance frames when a warning is selected
   useEffect(() => {
-    if (!warning || !meshData || !meshData.frames || meshData.frames.length === 0) return;
+    if (!warning || meshFrames.length === 0) return;
 
     const meshStart = warning.mesh_frame_start || 0;
-    const totalMeshFrames = meshData.frames.length;
+    const totalMeshFrames = meshFrames.length;
     const numFrames = totalMeshFrames - meshStart;
 
     if (numFrames <= 0) return;
@@ -42,28 +57,28 @@ function CameraView3D({
     }, 1000 / 15); // 15fps
 
     return () => clearInterval(animRef.current);
-  }, [warning, meshData, onFrameChange]);
+  }, [warning, meshFrames, onFrameChange]);
 
   // Get current mesh frame index
   const currentMeshFrameIdx = useMemo(() => {
-    if (!meshData || !meshData.frames || meshData.frames.length === 0) return 0;
+    if (meshFrames.length === 0) return 0;
     if (!warning) {
-      return Math.min(frameIndex, meshData.frames.length - 1);
+      return Math.min(frameIndex, meshFrames.length - 1);
     }
     const meshStart = warning.mesh_frame_start || 0;
-    return Math.min(meshStart + frameIndex, meshData.frames.length - 1);
-  }, [warning, frameIndex, meshData]);
+    return Math.min(meshStart + frameIndex, meshFrames.length - 1);
+  }, [warning, frameIndex, meshFrames]);
 
   // Current frame verts (as nested array for BodyMesh)
   const currentVerts = useMemo(() => {
-    if (!meshData || !meshData.frames[currentMeshFrameIdx]) return null;
-    return meshData.frames[currentMeshFrameIdx].verts;
-  }, [meshData, currentMeshFrameIdx]);
+    if (!meshFrames[currentMeshFrameIdx]) return null;
+    return meshFrames[currentMeshFrameIdx].verts;
+  }, [meshFrames, currentMeshFrameIdx]);
 
   // Mesh centroid — compute from first frame once, then update from current
   const initialCentroid = useMemo(() => {
-    if (!meshData || !meshData.frames || !meshData.frames[0]) return null;
-    const verts = meshData.frames[0].verts;
+    if (!meshFrames[0]) return null;
+    const verts = meshFrames[0].verts;
     let cx = 0, cy = 0, cz = 0;
     for (let i = 0; i < verts.length; i++) {
       cx += verts[i][0];
@@ -71,7 +86,7 @@ function CameraView3D({
       cz += verts[i][2];
     }
     return [cx / verts.length, cy / verts.length, cz / verts.length];
-  }, [meshData]);
+  }, [meshFrames]);
 
   const meshCentroid = useMemo(() => {
     if (!currentVerts || currentVerts.length === 0) return initialCentroid || [0, 1, 0];
@@ -121,7 +136,7 @@ function CameraView3D({
       </Canvas>
 
       {/* Overlay: frame counter */}
-      {meshData && meshData.frames && meshData.frames.length > 0 && (
+      {meshFrames.length > 0 && (
         <div style={{
           position: 'absolute',
           bottom: 12,
@@ -131,7 +146,7 @@ function CameraView3D({
           fontSize: 11,
           pointerEvents: 'none',
         }}>
-          Frame {currentMeshFrameIdx + 1}/{meshData.frames.length}
+          Frame {currentMeshFrameIdx + 1}/{meshFrames.length}
         </div>
       )}
 

@@ -134,6 +134,7 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLaunchingVisualizer, setIsLaunchingVisualizer] = useState(false);
   const [activeJobId, setActiveJobId] = useState(null);
+  const [showEmbeddedVisualizer, setShowEmbeddedVisualizer] = useState(false);
 
   const pollTimerRef = useRef(null);
   const consecutivePollErrorsRef = useRef(0);
@@ -231,6 +232,7 @@ function App() {
     };
 
     const finalizeJob = async (payload) => {
+      let resolvedJob = payload;
       try {
         const artifactsPayload = await fetchArtifacts(payload.job_id);
         if (!cancelled) {
@@ -264,6 +266,25 @@ function App() {
         if (!cancelled) {
           setInferenceSceneLoading(false);
         }
+      }
+
+      try {
+        const visualizerPayload = await launchVisualizer(payload.job_id);
+        if (!cancelled) {
+          resolvedJob = visualizerPayload;
+          setJob(visualizerPayload);
+          if (visualizerPayload.visualizer_url) {
+            setShowEmbeddedVisualizer(true);
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setJobError((current) => current || error.message);
+        }
+      }
+
+      if (!cancelled && resolvedJob.visualizer_url) {
+        setShowEmbeddedVisualizer(true);
       }
     };
 
@@ -383,6 +404,7 @@ function App() {
 
   const handleUseDemoScene = () => {
     setSceneMode('demo');
+    setShowEmbeddedVisualizer(false);
   };
 
   const handleLaunchVisualizer = async () => {
@@ -396,6 +418,9 @@ function App() {
     try {
       const payload = await launchVisualizer(job.job_id);
       setJob(payload);
+      if (payload.visualizer_url) {
+        setShowEmbeddedVisualizer(true);
+      }
     } catch (error) {
       setJobError(error.message);
     } finally {
@@ -620,7 +645,16 @@ function App() {
         </aside>
 
         <main className="main-content">
-          {sceneLoading ? (
+          {showEmbeddedVisualizer && job?.visualizer_url ? (
+            <div className="camera-view camera-visualizer">
+              <iframe
+                title="Trajectory visualizer"
+                src={job.visualizer_url}
+                className="camera-visualizer-iframe"
+                allow="autoplay; fullscreen"
+              />
+            </div>
+          ) : sceneLoading ? (
             <div className="camera-view camera-empty">
               {sceneMode === 'inference' ? 'Preparing inferred 3D scene...' : 'Loading 3D scene...'}
             </div>
@@ -647,6 +681,15 @@ function App() {
                 totalFrames={totalFrames}
                 onFrameChange={setFrameIndex}
               />
+              {job?.visualizer_url && (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setShowEmbeddedVisualizer((current) => !current)}
+                >
+                  {showEmbeddedVisualizer ? 'Show inferred scene' : 'Show embedded visualizer'}
+                </button>
+              )}
               <VideoTrack
                 videos={uploadedVideos}
                 selectedVideoId={selectedVideoId}
