@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import BodyMesh from './BodyMesh';
-import PointCloudView from './PointCloudView';
+
 import CameraController from './CameraController';
+import SceneModel from './SceneModel';
 
 const SEVERITY_COLORS = {
   critical: '#ef4444',
@@ -94,7 +95,7 @@ function CameraView3D({
   return (
     <div className="camera-view">
       <Canvas
-        camera={{ fov: 60, near: 0.01, far: 200, position: [1.5, 1, 2.5] }}
+        camera={{ fov: 60, near: 0.01, far: 1000, position: [0, 5, 20] }}
         gl={{ antialias: true }}
         style={{ background: '#12151e' }}
       >
@@ -110,19 +111,13 @@ function CameraView3D({
           />
         )}
 
-        {pointCloud && (
-          <PointCloudView
-            positions={pointCloud.positions}
-            colors={pointCloud.colors}
-          />
-        )}
 
         <CameraController
           meshCentroid={meshCentroid}
         />
 
-        <axesHelper args={[5]} />
-        <gridHelper args={[20, 20, '#2a2d3a', '#1e2230']} />
+        <SceneModel />
+
       </Canvas>
 
       {/* Overlay: frame counter */}
