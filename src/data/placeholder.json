@@ -4,208 +4,74 @@
   },
   "warnings": [
     {
-      "timestamp": "2026-01-05T07:47:49",
+      "timestamp": "2026-03-14T08:15:00",
+      "severity": "critical",
+      "text": "Worker detected in close proximity to active machinery without proper lockout/tagout procedure. Immediate intervention required.",
+      "person": "Person A",
+      "sceneFile": "scene_1.json"
+    },
+    {
+      "timestamp": "2026-03-14T10:00:00",
       "severity": "high",
       "text": "Person reaching dangerously close to rotating blade guard. Left hand within 15cm of hazard zone.",
-      "person": "Person C"
+      "person": "Person B",
+      "sceneFile": "scene_2.json"
     },
     {
-      "timestamp": "2026-01-07T09:47:37",
-      "severity": "low",
-      "text": "Hard hat slightly tilted, not fully secured. Minor PPE adjustment needed.",
-      "person": "Person A"
-    },
-    {
-      "timestamp": "2026-01-10T15:05:14",
-      "severity": "medium",
-      "text": "Person not wearing required safety goggles while operating grinding station.",
-      "person": "Person D"
-    },
-    {
-      "timestamp": "2026-01-12T08:13:23",
-      "severity": "critical",
-      "text": "Person leaning into conveyor belt zone. Immediate entanglement risk detected.",
-      "person": "Person B"
-    },
-    {
-      "timestamp": "2026-01-15T07:35:41",
-      "severity": "medium",
-      "text": "Two workers in close proximity near press brake. Insufficient clearance for safe operation.",
-      "person": "Person B"
-    },
-    {
-      "timestamp": "2026-01-18T15:26:33",
-      "severity": "high",
-      "text": "Person climbing on racking system without fall protection harness.",
-      "person": "Person B"
-    },
-    {
-      "timestamp": "2026-01-20T11:51:24",
-      "severity": "low",
-      "text": "Person standing slightly outside designated walkway. Minor positional deviation.",
-      "person": "Person A"
-    },
-    {
-      "timestamp": "2026-01-23T09:44:31",
-      "severity": "high",
-      "text": "Welding operation detected without proper face shield. Arc flash exposure risk.",
-      "person": "Person D"
-    },
-    {
-      "timestamp": "2026-01-25T09:13:16",
+      "timestamp": "2026-03-14T11:45:00",
       "severity": "critical",
       "text": "Person entered lockout/tagout zone while machine is energized. Immediate danger.",
-      "person": "Person C"
+      "person": "Person D",
+      "sceneFile": "scene_8.json"
     },
     {
-      "timestamp": "2026-01-27T13:06:51",
+      "timestamp": "2026-03-14T13:30:00",
       "severity": "medium",
-      "text": "Forklift approaching pedestrian zone at excessive speed. Near-miss incident.",
-      "person": "Person C"
+      "text": "Person not wearing required safety goggles while operating grinding station.",
+      "person": "Person D",
+      "sceneFile": "scene_4.json"
     },
     {
-      "timestamp": "2026-01-31T16:16:14",
-      "severity": "low",
-      "text": "Safety signage partially obscured by stacked materials. Visibility reduced.",
-      "person": "Person A"
-    },
-    {
-      "timestamp": "2026-02-02T15:07:34",
+      "timestamp": "2026-03-14T15:15:00",
       "severity": "high",
-      "text": "Person lifting heavy object with improper posture. High risk of back injury.",
-      "person": "Person D"
+      "text": "Welding operation detected without proper face shield. Arc flash exposure risk.",
+      "person": "Person A",
+      "sceneFile": "scene_9.json"
     },
     {
-      "timestamp": "2026-02-03T11:53:56",
-      "severity": "medium",
-      "text": "Chemical spill detected near workstation. Person not wearing chemical-resistant gloves.",
-      "person": "Person C"
-    },
-    {
-      "timestamp": "2026-02-07T08:02:39",
+      "timestamp": "2026-03-14T17:00:00",
       "severity": "critical",
-      "text": "Person caught between moving platform and fixed structure. Crush hazard imminent.",
-      "person": "Person B"
+      "text": "Person leaning into conveyor belt zone. Immediate entanglement risk detected.",
+      "person": "Person C",
+      "sceneFile": "scene_3.json"
     },
     {
-      "timestamp": "2026-02-09T08:54:46",
+      "timestamp": "2026-03-14T18:45:00",
       "severity": "low",
-      "text": "Ambient noise level exceeding 80dB. Hearing protection advisory.",
-      "person": "Person B"
+      "text": "Hard hat slightly tilted, not fully secured. Minor PPE adjustment needed.",
+      "person": "Person C",
+      "sceneFile": "scene_7.json"
     },
     {
-      "timestamp": "2026-02-12T13:17:20",
+      "timestamp": "2026-03-14T20:30:00",
       "severity": "high",
-      "text": "Overhead crane load swinging near personnel. Exclusion zone not maintained.",
-      "person": "Person D"
+      "text": "Person climbing on racking system without fall protection harness.",
+      "person": "Person A",
+      "sceneFile": "scene_5.json"
     },
     {
-      "timestamp": "2026-02-14T12:10:44",
+      "timestamp": "2026-03-14T22:00:00",
       "severity": "medium",
-      "text": "Person operating forklift without seatbelt fastened. Moderate safety violation.",
-      "person": "Person C"
+      "text": "Two workers in close proximity near press brake. Insufficient clearance for safe operation.",
+      "person": "Person B",
+      "sceneFile": "scene_6.json"
     },
     {
-      "timestamp": "2026-02-16T17:17:08",
+      "timestamp": "2026-03-14T23:45:00",
       "severity": "low",
-      "text": "Emergency exit path partially blocked by pallets. Clearance below minimum width.",
-      "person": "Person A"
-    },
-    {
-      "timestamp": "2026-02-19T09:34:12",
-      "severity": "high",
-      "text": "Electrical panel accessed without insulated gloves. Electrocution risk.",
-      "person": "Person B"
-    },
-    {
-      "timestamp": "2026-02-21T13:17:08",
-      "severity": "critical",
-      "text": "Gas leak detected in welding bay. Person still present without respiratory protection.",
-      "person": "Person B"
-    },
-    {
-      "timestamp": "2026-02-24T07:14:34",
-      "severity": "medium",
-      "text": "Scaffolding guardrail missing on second tier. Fall hazard for workers above.",
-      "person": "Person A"
-    },
-    {
-      "timestamp": "2026-02-27T13:17:34",
-      "severity": "high",
-      "text": "Person using damaged power tool with exposed wiring. Shock and fire risk.",
-      "person": "Person A"
-    },
-    {
-      "timestamp": "2026-03-01T16:56:46",
-      "severity": "low",
-      "text": "Safety shower not tested this week. Compliance check overdue.",
-      "person": "Person C"
-    },
-    {
-      "timestamp": "2026-03-03T14:25:42",
-      "severity": "critical",
-      "text": "Confined space entry without atmospheric monitoring. Oxygen deficiency risk.",
-      "person": "Person D"
-    },
-    {
-      "timestamp": "2026-03-05T09:15:04",
-      "severity": "medium",
-      "text": "Hot work permit expired 2 hours ago. Welding operation still in progress.",
-      "person": "Person C"
-    },
-    {
-      "timestamp": "2026-03-09T13:57:24",
-      "severity": "high",
-      "text": "Person bypassed machine guard to clear jam. Hands inside pinch point zone.",
-      "person": "Person D"
-    },
-    {
-      "timestamp": "2026-03-11T09:32:37",
-      "severity": "medium",
-      "text": "Ladder placed on uneven surface at incorrect angle. Tip-over risk during use.",
-      "person": "Person D"
-    },
-    {
-      "timestamp": "2026-03-13T07:55:57",
-      "severity": "high",
-      "text": "Compressed air being used to clean clothing. Injection injury hazard.",
-      "person": "Person A"
-    },
-    {
-      "timestamp": "2026-03-16T09:50:06",
-      "severity": "critical",
-      "text": "Structural crack detected on lifting beam during operation. Catastrophic failure risk.",
-      "person": "Person D"
-    },
-    {
-      "timestamp": "2026-03-19T13:24:38",
-      "severity": "low",
-      "text": "First aid kit supplies below minimum count. Restocking required.",
-      "person": "Person D"
-    },
-    {
-      "timestamp": "2026-03-21T15:55:03",
-      "severity": "medium",
-      "text": "Dust extraction system running below rated capacity. Airborne particulate levels elevated.",
-      "person": "Person A"
-    },
-    {
-      "timestamp": "2026-03-24T08:43:38",
-      "severity": "high",
-      "text": "Person standing in forklift travel lane while distracted. Unaware of approaching vehicle.",
-      "person": "Person C"
-    },
-    {
-      "timestamp": "2026-03-27T12:07:39",
-      "severity": "critical",
-      "text": "Fire detected near flammable storage cabinet. Suppression system not yet activated.",
-      "person": "Person C"
-    },
-    {
-      "timestamp": "2026-03-29T14:00:43",
-      "severity": "low",
-      "text": "Toolbox left open on floor creating trip hazard. Housekeeping reminder issued.",
-      "person": "Person C"
+      "text": "Person standing slightly outside designated walkway. Minor positional deviation.",
+      "person": "Person B",
+      "sceneFile": "scene_10.json"
     }
   ]
 }
